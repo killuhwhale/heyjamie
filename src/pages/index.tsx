@@ -23,7 +23,7 @@ const QueryResult: React.FC<QueryResultProps> = (props) => {
       return new Promise((res, rej) => {
         console.log("useEffect QR: ", msgToSpk)
         const msg = new window.SpeechSynthesisUtterance()
-        const voices = [2,3,9,10,11]
+        const voices = [2,3,9]
         const voiceNum  = voices[parseInt((Math.random() * (voices.length - 1)).toString())] || 0
         console.log(`Voice num ${voiceNum}`)
 
@@ -58,7 +58,7 @@ const QueryResult: React.FC<QueryResultProps> = (props) => {
         const ans = getAnswer.data?.answer || ""
         // todo split into word chunks
         const words = ans.split(" ")
-        const sentSize = 18
+        const sentSize = 16
         const promises = []
 
         for(let i =0; i < words.length; i += sentSize){
@@ -73,7 +73,6 @@ const QueryResult: React.FC<QueryResultProps> = (props) => {
               _res("")
             }).catch(err => {
               console.log("Error sayMsg", err)
-
               _rej()
             })
 
@@ -81,6 +80,9 @@ const QueryResult: React.FC<QueryResultProps> = (props) => {
 
 
         }
+
+
+
 
        Promise.all(promises).then(() => {
           window.speechSynthesis.cancel()
