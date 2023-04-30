@@ -46,6 +46,13 @@ export const authOptions: NextAuthOptions = {
         id: user.id,
       },
     }),
+    signIn: async ({ account, profile }) => {
+      if (account && profile && profile.email && account.provider === "google") {
+        return ['andayac@gmail.com'].indexOf(profile.email) >= 0
+      }
+      return false
+    },
+
   },
   adapter: PrismaAdapter(prisma),
   providers: [

@@ -25,7 +25,7 @@ export const exampleRouter = createTRPCRouter({
       };
     }),
 
-    openai: publicProcedure
+    openai: protectedProcedure
     .input(z.object({ text: z.string() }))
     .query(async ({ input }) => {
       let answer = ""

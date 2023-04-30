@@ -161,12 +161,10 @@ const AudioBox: React.FC = () => {
 
 
 const Home: NextPage = () => {
-  const hello = api.example.hello.useQuery({ text: "from tRPC" });
-
   return (
     <>
       <Head>
-        <title>Create T3 App</title>
+        <title>Hey Jamie</title>
         <meta name="description" content="TTS Hey Jamie assistant for podcasts." />
         <link rel="icon" href="/favicon.ico" />
       </Head>
