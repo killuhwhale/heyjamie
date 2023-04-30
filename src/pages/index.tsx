@@ -1,13 +1,9 @@
 import { type NextPage } from "next";
 import Head from "next/head";
-import Link from "next/link";
 import { signIn, signOut, useSession } from "next-auth/react";
-
 import { api } from "../utils/api";
 import { useEffect, useState } from "react";
 import SpeechRecognition, { useSpeechRecognition, } from 'react-speech-recognition';
-
-
 
 
 interface QueryResultProps {
@@ -92,8 +88,6 @@ const QueryResult: React.FC<QueryResultProps> = (props) => {
   )
 }
 
-
-
 const AudioBox: React.FC = () => {
   const [isListening, setIsListening] = useState(false);
   const [init, setInit] = useState(true);
@@ -158,7 +152,6 @@ const AudioBox: React.FC = () => {
     </div>
   )
 }
-
 
 const Home: NextPage = () => {
   return (
