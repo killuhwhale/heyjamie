@@ -24,7 +24,7 @@ const QueryResult: React.FC<QueryResultProps> = (props) => {
         console.log("useEffect QR: ", msgToSpk)
         const msg = new window.SpeechSynthesisUtterance()
         const voices = [2,3,9,10,11]
-        const voiceNum  = voices[parseInt((Math.random() * (voices.length - 1)).toString())]
+        const voiceNum  = voices[parseInt((Math.random() * (voices.length - 1)).toString())] || 0
         console.log(`Voice num ${voiceNum}`)
 
         if(voiceNum == undefined) return
