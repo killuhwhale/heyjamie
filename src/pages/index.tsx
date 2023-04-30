@@ -139,6 +139,10 @@ const AudioBox: React.FC = () => {
       command: 'Hey Jay Bird *',
       callback: (msg: string) => setQuestion(msg)
     },
+    {
+      command: 'Hey Robot *',
+      callback: (msg: string) => setQuestion(msg)
+    },
   ]
 
   const {
