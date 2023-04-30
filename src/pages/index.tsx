@@ -2,8 +2,9 @@ import { type NextPage } from "next";
 import Head from "next/head";
 import { signIn, signOut, useSession } from "next-auth/react";
 import { api } from "../utils/api";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import SpeechRecognition, { useSpeechRecognition, } from 'react-speech-recognition';
+import { randomInt } from "crypto";
 
 
 interface QueryResultProps {
@@ -14,20 +15,30 @@ interface QueryResultProps {
 
 const QueryResult: React.FC<QueryResultProps> = (props) => {
   const getAnswer = api.example.openai.useQuery({text: props.question});
-
+  const stopRef = useRef(false)
   useEffect(() => {
     const answer = getAnswer.data?.answer || ""
-
-    if(!answer) return
-
-    SpeechRecognition.stopListening().then(() => {true?"":""}).catch(err => {true?"":""})  // @typescript-eslint/no-empty-function
-    props.stopListen()
 
     const sayMsg = async (msgToSpk: string) => {
       return new Promise((res, rej) => {
         console.log("useEffect QR: ", msgToSpk)
         const msg = new window.SpeechSynthesisUtterance()
-        if(!msgToSpk) return
+        const voices = [2,3,9,10,11]
+        const voiceNum  = voices[parseInt((Math.random() * (voices.length - 1)).toString())]
+        console.log(`Voice num ${voiceNum}`)
+
+        if(voiceNum == undefined) return
+        msg.voice = window.speechSynthesis.getVoices()[voiceNum] || null
+        // msg.voice = window.speechSynthesis.getVoices()[2] || null // Aussie gal
+        // msg.voice = window.speechSynthesis.getVoices()[3] || null // aussie profession dude
+        // msg.voice = window.speechSynthesis.getVoices()[9] || null // latin accent funny
+        // msg.voice = window.speechSynthesis.getVoices()[10] || null // asian accent funny
+        // msg.voice = window.speechSynthesis.getVoices()[11] || null // asian accent accurate
+
+
+
+
+        if(!msgToSpk) return console.log("No msg to speak")
         msg.text = msgToSpk
 
         window.speechSynthesis.speak(msg)
@@ -35,7 +46,12 @@ const QueryResult: React.FC<QueryResultProps> = (props) => {
         msg.onerror = rej
       })
     }
+    // sayMsg("Ohhh, what cha yall gone do now this is a long message to test the stop button it may or may not work? I need a lot of words so lets see if it breaks early or not!").then(() => {""?'':''}).catch(() => {""?'':''})  // test voice, constant speak on render.
 
+    if(!answer) return
+
+    SpeechRecognition.stopListening().then(() => {true?"":""}).catch(err => {true?"":""})  // @typescript-eslint/no-empty-function
+    props.stopListen()
 
     const sayMessages = async () => {
       return new Promise((resolve, reject) => {
@@ -48,10 +64,16 @@ const QueryResult: React.FC<QueryResultProps> = (props) => {
         for(let i =0; i < words.length; i += sentSize){
           const wordsToSpk = words.slice(i, i+sentSize)
           promises.push(new Promise ((_res, _rej) => {
+            // if someRef.current = false then just resolve early...
+            console.log("In promise stopRef", stopRef)
+
+            if(stopRef.current) _res("") // resovle early if stopRef is set.
+
             sayMsg(wordsToSpk.join(" ")).then(() => {
               _res("")
             }).catch(err => {
               console.log("Error sayMsg", err)
+
               _rej()
             })
 
@@ -84,7 +106,17 @@ const QueryResult: React.FC<QueryResultProps> = (props) => {
 
   }, [getAnswer.data?.answer])
   return (
+    <>
     <h2 className="text-white"> {getAnswer.data?.answer}</h2>
+{/*
+    <button
+      onClick={() => {
+        stopRef.current = true
+        setTimeout(() => stopRef.current = false, 1000)
+
+      }}
+    >Stop</button> */}
+    </>
   )
 }
 
@@ -99,6 +131,14 @@ const AudioBox: React.FC = () => {
       command: 'Hey Jamie *',
       callback: (msg: string) => setQuestion(msg)
     },
+    {
+      command: 'Hey JayBird *',
+      callback: (msg: string) => setQuestion(msg)
+    },
+    {
+      command: 'Hey Jay Bird *',
+      callback: (msg: string) => setQuestion(msg)
+    },
   ]
 
   const {
@@ -109,6 +149,9 @@ const AudioBox: React.FC = () => {
   } = useSpeechRecognition({commands});
 
   useEffect(() => {
+
+
+
     if(question.length <= 0) return
     resetTranscript()
     console.log("Asking ChatGPT for the answer to: ", question)
@@ -154,6 +197,7 @@ const AudioBox: React.FC = () => {
 }
 
 const Home: NextPage = () => {
+
   return (
     <>
       <Head>
