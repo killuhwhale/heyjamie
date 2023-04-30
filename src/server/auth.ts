@@ -46,8 +46,10 @@ export const authOptions: NextAuthOptions = {
         id: user.id,
       },
     }),
-    signIn: async ({ account, profile }) => {
+    signIn: ({ account, profile }) => {
+      console.log("Sign in called with ", account, profile)
       if (account && profile && profile.email && account.provider === "google") {
+
         return ['andayac@gmail.com'].indexOf(profile.email) >= 0
       }
       return false
@@ -56,10 +58,10 @@ export const authOptions: NextAuthOptions = {
   },
   adapter: PrismaAdapter(prisma),
   providers: [
-    DiscordProvider({
-      clientId: env.DISCORD_CLIENT_ID,
-      clientSecret: env.DISCORD_CLIENT_SECRET,
-    }),
+    // DiscordProvider({
+    //   clientId: env.DISCORD_CLIENT_ID,
+    //   clientSecret: env.DISCORD_CLIENT_SECRET,
+    // }),
     GoogleProvider({
       clientId: env.GOOGLE_CLIENT_ID,
       clientSecret: env.GOOGLE_CLIENT_SECRET
