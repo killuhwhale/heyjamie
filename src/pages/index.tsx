@@ -23,12 +23,13 @@ const QueryResult: React.FC<QueryResultProps> = (props) => {
       return new Promise((res, rej) => {
         console.log("useEffect QR: ", msgToSpk)
         const msg = new window.SpeechSynthesisUtterance()
-        const voices = [2,3,9]
-        const voiceNum  = voices[parseInt((Math.random() * (voices.length - 1)).toString())] || 0
+        // const voices = [2,3,9]
+        // const voiceNum  = voices[parseInt((Math.random() * (voices.length - 1)).toString())] || 0
+        const voiceNum  = 0
         console.log(`Voice num ${voiceNum}`)
 
         if(voiceNum == undefined) return
-        msg.voice = window.speechSynthesis.getVoices()[voiceNum] || null
+        // msg.voice = window.speechSynthesis.getVoices()[voiceNum] || null
         // msg.voice = window.speechSynthesis.getVoices()[2] || null // Aussie gal
         // msg.voice = window.speechSynthesis.getVoices()[3] || null // aussie profession dude
         // msg.voice = window.speechSynthesis.getVoices()[9] || null // latin accent funny

@@ -14,7 +14,7 @@ const configuration = new Configuration({
 });
 const openai = new OpenAIApi(configuration);
 
-const cache  = new Set();
+
 
 export const exampleRouter = createTRPCRouter({
   hello: publicProcedure
@@ -29,9 +29,9 @@ export const exampleRouter = createTRPCRouter({
     .input(z.object({ text: z.string() }))
     .query(async ({ input }) => {
       let answer = ""
-      if(input.text.length <= 0 || cache.has(input.text)) return {answer: ''}
+      if(input.text.length <= 5) return {answer: ''}
 
-      cache.add(input.text)
+
 
       try{
         // const response = await openai.listEngines();
