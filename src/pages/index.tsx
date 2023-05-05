@@ -294,7 +294,7 @@ const AudioBox: React.FC = () => {
       SpeechRecognition.stopListening().then(() => {true?"":""}).catch(err => {true?"":""})
     }else if(!init && !listening ){
       console.log("starting to listen")
-      SpeechRecognition.startListening({continuous: true}).then(() => {true?"":""}).catch(err => {true?"":""})
+      SpeechRecognition.startListening({continuous: true}).then(() => {true?"":""}).catch(err => {console.log("Start listen error: ", err)})
     }else if(init){
       setInit(false)
     }
