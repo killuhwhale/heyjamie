@@ -154,25 +154,26 @@ const QueryResult: React.FC<QueryResultProps> = (props) => {
     const rawData = getSpeech.data?.gcpRes
     if(!rawData) return
 
-    let raw = window.atob(rawData);
-    let rawLength = raw.length;
-    let arr = new Uint8Array(new ArrayBuffer(rawLength));
+    const raw = window.atob(rawData);
+    const rawLength = raw.length;
+    const arr = new Uint8Array(new ArrayBuffer(rawLength));
 
     for (let i = 0; i < rawLength; i++) {
       arr[i] = raw.charCodeAt(i);
     }
 
-    let blob = new Blob([arr], {
+    const blob = new Blob([arr], {
       type: 'audio/mp3'
     });
-    let blobUrl = URL.createObjectURL(blob);
+    const blobUrl = URL.createObjectURL(blob);
     const audio = new Audio();
     audioRef.current = audio
     audio.src = blobUrl
     setPlaying(true)
     props.stopListen()
     console.log("Playing!!!")
-    audio.play().then(() => console.log("Done playing"))
+    audio.play().then(() => console.log("Done playing")).catch(err => console.log("onPlayerr", err))
+
     audio.onended = () => {
       setPlaying(false)
       props.startListen()
@@ -183,7 +184,7 @@ const QueryResult: React.FC<QueryResultProps> = (props) => {
 
   useEffect(() => {
     if(playing){
-      audioRef.current?.play()
+      audioRef.current?.play().then(() => console.log("Done playing")).catch(err => console.log("onPlayerr", err))
       props.stopListen()
     }else{
       audioRef.current?.pause()

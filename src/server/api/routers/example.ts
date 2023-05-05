@@ -92,7 +92,7 @@ export const exampleRouter = createTRPCRouter({
         if(gcpRes[0].audioContent){
           // writeFile(path.join(`output.mp3`), gcpRes[0].audioContent, () => console.log("Done writing...") )
           const audio: Uint8Array = gcpRes[0].audioContent as Uint8Array
-          var base64 = btoa(
+          const base64 = btoa(
             audio
             .reduce((data, byte) => data + String.fromCharCode(byte), '')
             );
