@@ -22,9 +22,9 @@ railway open
 
 Go to “Variables” and include your DATABASE_URL. Then go to “Settings” and select “Generate Domain.”
 
+gcloud auth application-default login
 
 # TODO
-
 
 - GAuth
     - Need redirect URL in Google Console

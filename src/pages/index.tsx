@@ -150,6 +150,7 @@ const QueryResult: React.FC<QueryResultProps> = (props) => {
 
 
   useEffect(() => {
+    console.log("GCP Res ", getSpeech.data?.gcpRes)
     if(!getSpeech.data?.gcpRes) return
     const rawData = getSpeech.data?.gcpRes
     if(!rawData) return
@@ -260,6 +261,13 @@ const AudioBox: React.FC = () => {
     },
     {
       command: 'Hey Robot *',
+      callback: (msg: string) => {
+        setQuestion(`${promptB}  ${msg}`)
+        setVoice("en-US-Studio-O")
+      }
+    },
+    {
+      command: 'A Robot *',
       callback: (msg: string) => {
         setQuestion(`${promptB}  ${msg}`)
         setVoice("en-US-Studio-O")
