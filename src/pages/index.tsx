@@ -289,15 +289,18 @@ const AudioBox: React.FC = () => {
 
 
   useEffect(() => {
-    console.log("CLicked", init, isListening, listening)
-    if((listening && isListening) || listening){
-      SpeechRecognition.stopListening().then(() => {true?"":""}).catch(err => {true?"":""})
-    }else if(!init && !listening ){
-      console.log("starting to listen")
-      SpeechRecognition.startListening({continuous: true}).then(() => {true?"":""}).catch(err => {console.log("Start listen error: ", err)})
-    }else if(init){
-      setInit(false)
-    }
+    try{
+      console.log("CLicked", init, isListening, listening)
+      if((listening && isListening) || listening){
+        SpeechRecognition.stopListening().then(() => {true?"":""}).catch(err => {true?"":""})
+      }else if(!init && !listening ){
+        console.log("starting to listen")
+        SpeechRecognition.startListening({continuous: true}).then(() => {true?"":""}).catch(err => {console.log("Start listen error: ", err)})
+      }else if(init){
+        setInit(false)
+      }
+
+    }catch(error){console.log("UseEffect error: ", error)}
   }, [isListening])
 
   return (
