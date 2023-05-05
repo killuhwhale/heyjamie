@@ -4,32 +4,74 @@ import { signIn, signOut, useSession } from "next-auth/react";
 import { api } from "../utils/api";
 import { useEffect, useRef, useState } from "react";
 import SpeechRecognition, { useSpeechRecognition, } from 'react-speech-recognition';
-import { randomInt } from "crypto";
+import { env } from "../env.mjs";
 
 
+
+class CancelablePromise<T> extends Promise<T> {
+  private cancelFn?: (() => void);
+
+  constructor(executor: (resolve: (value?: T | PromiseLike<T>) => void, reject: (reason?: any) => void) => void) {
+    super((resolve, reject) => {
+      executor(
+        (value?: T | PromiseLike<T>) => {
+          if (this.cancelFn) {
+            reject('Promise canceled');
+          } else {
+            if(value) resolve(value);
+
+          }
+        },
+        reject
+      );
+    });
+  }
+
+  public cancel(): void {
+    this.cancelFn = () => {
+      // Do nothing
+    };
+  }
+}
+
+console.log("ENV", process.env)
 interface QueryResultProps {
   question: string;
+  voiceName: string;
   startListen(): void;
   stopListen(): void;
 }
 
+/** To get better voice maybe setup another server for https://github.com/enhuiz/vall-e?ref=blog.paperspace.com */
+
+
 const QueryResult: React.FC<QueryResultProps> = (props) => {
-  const getAnswer = api.example.openai.useQuery({text: props.question});
-  const stopRef = useRef(false)
+  const getAnswer = api.example.openai.useMutation();
+  const getSpeech = api.example.ttsGCP.useMutation();
+  const audioRef = useRef<HTMLAudioElement>()
+  const [playing, setPlaying] = useState(false)
+
+
+  useEffect(() => {
+    getAnswer.mutate({text: props.question })
+  }, [props.question])
+
+
   useEffect(() => {
     const answer = getAnswer.data?.answer || ""
-
+    if(!answer) return
+    getSpeech.mutate({text: answer, voiceName: props.voiceName})
     const sayMsg = async (msgToSpk: string) => {
-      return new Promise((res, rej) => {
+      return new CancelablePromise((res, rej) => {
         console.log("useEffect QR: ", msgToSpk)
         const msg = new window.SpeechSynthesisUtterance()
-        // const voices = [2,3,9]
+        const voices = [2,0,3,9]
         // const voiceNum  = voices[parseInt((Math.random() * (voices.length - 1)).toString())] || 0
-        const voiceNum  = 0
+        const voiceNum  = props.voice
         console.log(`Voice num ${voiceNum}`)
 
         if(voiceNum == undefined) return
-        // msg.voice = window.speechSynthesis.getVoices()[voiceNum] || null
+        msg.voice = window.speechSynthesis.getVoices()[voiceNum] || null
         // msg.voice = window.speechSynthesis.getVoices()[2] || null // Aussie gal
         // msg.voice = window.speechSynthesis.getVoices()[3] || null // aussie profession dude
         // msg.voice = window.speechSynthesis.getVoices()[9] || null // latin accent funny
@@ -49,77 +91,119 @@ const QueryResult: React.FC<QueryResultProps> = (props) => {
     }
     // sayMsg("Ohhh, what cha yall gone do now this is a long message to test the stop button it may or may not work? I need a lot of words so lets see if it breaks early or not!").then(() => {""?'':''}).catch(() => {""?'':''})  // test voice, constant speak on render.
 
-    if(!answer) return
+    // // SpeechRecognition.stopListening().then(() => {true?"":""}).catch(err => {true?"":""})  // @typescript-eslint/no-empty-function
+    // props.stopListen()
+    // const sayMessages =  () => {
+    //   const ans = getAnswer.data?.answer || ""
+    //   // todo split into word chunks
+    //   const words = ans.split(" ")
+    //   const sentSize = 16
+    //   const promises: any[] = []
 
-    SpeechRecognition.stopListening().then(() => {true?"":""}).catch(err => {true?"":""})  // @typescript-eslint/no-empty-function
-    props.stopListen()
+    //   for(let i =0; i < words.length; i += sentSize){
+    //     const wordsToSpk = words.slice(i, i+sentSize)
+    //     promises.push(new CancelablePromise ((_res, _rej) => {
+    //       // if someRef.current = false then just resolve early...
+    //       console.log("In promise stopRef", stopRef)
 
-    const sayMessages = async () => {
-      return new Promise((resolve, reject) => {
-        const ans = getAnswer.data?.answer || ""
-        // todo split into word chunks
-        const words = ans.split(" ")
-        const sentSize = 16
-        const promises = []
+    //       if(stopRef.current) _res("") // resovle early if stopRef is set.
 
-        for(let i =0; i < words.length; i += sentSize){
-          const wordsToSpk = words.slice(i, i+sentSize)
-          promises.push(new Promise ((_res, _rej) => {
-            // if someRef.current = false then just resolve early...
-            console.log("In promise stopRef", stopRef)
+    //       sayMsg(wordsToSpk.join(" ")).then(() => {
+    //         _res("")
+    //       }).catch(err => {
+    //         console.log("Error sayMsg", err)
+    //         _rej()
+    //       })
 
-            if(stopRef.current) _res("") // resovle early if stopRef is set.
-
-            sayMsg(wordsToSpk.join(" ")).then(() => {
-              _res("")
-            }).catch(err => {
-              console.log("Error sayMsg", err)
-              _rej()
-            })
-
-          }))
+    //     }))
 
 
-        }
+    //   }
 
 
 
 
-       Promise.all(promises).then(() => {
-          window.speechSynthesis.cancel()
-          resolve("")
-        })
-        .catch(err => {
-          console.log("SayMessages error: ", err)
-          reject()
-        })
+    // return new CancelablePromise((res, rej) => {
+    //   Promise.all(promises).then(() => {
+    //      window.speechSynthesis.cancel()
+    //      res("")
+    //    })
+    //    .catch(err => {
+    //      console.log("SayMessages error: ", err)
+    //      rej()
+    //    })
 
-      })
-    }
+    //  })
+    // }
 
-    sayMessages().then(() => {
-      window.speechSynthesis.cancel()
-      props.startListen()
-    })
-    .catch(err => {
-      console.log("Overall saymessages error: ", err)
-    })
+    // const msgPromise = sayMessages()
 
-
+    // msgPromise.then(() => {
+    //   window.speechSynthesis.cancel()
+    //   props.startListen()
+    // })
+    // .catch(err => {
+    //   console.log("Overall saymessages error: ", err)
+    // })
 
   }, [getAnswer.data?.answer])
-  return (
-    <>
-    <h2 className="text-white"> {getAnswer.data?.answer}</h2>
-{/*
-    <button
-      onClick={() => {
-        stopRef.current = true
-        setTimeout(() => stopRef.current = false, 1000)
 
+
+  useEffect(() => {
+    if(!getSpeech.data?.gcpRes) return
+    const rawData = getSpeech.data?.gcpRes
+    if(!rawData) return
+
+    let raw = window.atob(rawData);
+    let rawLength = raw.length;
+    let arr = new Uint8Array(new ArrayBuffer(rawLength));
+
+    for (let i = 0; i < rawLength; i++) {
+      arr[i] = raw.charCodeAt(i);
+    }
+
+    let blob = new Blob([arr], {
+      type: 'audio/mp3'
+    });
+    let blobUrl = URL.createObjectURL(blob);
+    const audio = new Audio();
+    audioRef.current = audio
+    audio.src = blobUrl
+    setPlaying(true)
+    props.stopListen()
+    console.log("Playing!!!")
+    audio.play().then(() => console.log("Done playing"))
+    audio.onended = () => {
+      setPlaying(false)
+      props.startListen()
+    }
+
+  }, [getSpeech.data?.gcpRes])
+
+
+  useEffect(() => {
+    if(playing){
+      audioRef.current?.play()
+      props.stopListen()
+    }else{
+      audioRef.current?.pause()
+      props.startListen()
+    }
+  }, [playing])
+
+
+  return (
+    <div className="w-full flex justify-center ">
+
+    <h2 className="text-white w-2/3"> {getAnswer.data?.answer}</h2>
+
+    <button
+    className={`w-1/2 p-1  ${playing? 'bg-rose-600 text-red-100': 'bg-emerald-600 text-emerald-100'}   `}
+      onClick={() => {
+        setPlaying(!playing)
       }}
-    >Stop</button> */}
-    </>
+    >{playing? 'Stop speaking': 'Play'}</button>
+    </div>
   )
 }
 
@@ -128,23 +212,64 @@ const AudioBox: React.FC = () => {
   const [init, setInit] = useState(true);
 
   const [question, setQuestion] = useState("")
+  const [voice, setVoice] = useState("en-US-Neural2-D")
+
+
+  const [promptA, setPropmptA ] = useState(`Reply as if you are Jamie Vernon, Joe Rogan's assistant from the Joe Rogan Podcast
+  but dont say this in your response unless asked
+  who you are or what your name is, this is for fun,
+  please play along and do not mention that you are just
+  a Large language model because we already know, thanks!
+  Please answer:`)
+
+  const [promptB, setPropmptB ] = useState(`Reply as if you are Domo Arigato the Robot and are an adavanced robotic intelligence
+  but dont say this in your response unless asked
+  who you are or what your name is, this is for fun,
+  please play along and do not mention that you are just
+  a Large language model because we already know, thanks!
+  Please answer:`)
+  const [promptC, setPropmptC ] = useState(`Reply as if you are a Ph.D therapist named Betty
+  but dont say this in your response unless asked
+  who you are or what your name is, this is for fun,
+  please play along and do not mention that you are just
+  a Large language model because we already know, thanks!
+  Please answer:`)
 
   const commands = [
     {
       command: 'Hey Jamie *',
-      callback: (msg: string) => setQuestion(msg)
+      callback: (msg: string) => {
+        setQuestion(`${promptA}  ${msg}`)
+        setVoice("en-US-Studio-M")
+      }
     },
     {
       command: 'Hey JayBird *',
-      callback: (msg: string) => setQuestion(msg)
+      callback: (msg: string) => {
+        setQuestion(msg)
+        setVoice("en-US-Neural2-F")
+      }
     },
     {
       command: 'Hey Jay Bird *',
-      callback: (msg: string) => setQuestion(msg)
+      callback: (msg: string) => {
+        setQuestion(msg)
+        setVoice("en-US-Neural2-F")
+      }
     },
     {
       command: 'Hey Robot *',
-      callback: (msg: string) => setQuestion(msg)
+      callback: (msg: string) => {
+        setQuestion(`${promptB}  ${msg}`)
+        setVoice("en-US-Studio-O")
+      }
+    },
+    {
+      command: 'Hey Betty *',
+      callback: (msg: string) => {
+        setQuestion(`${promptC}  ${msg}`)
+          setVoice("en-US-Neural2-C")
+      }
     },
   ]
 
@@ -156,9 +281,6 @@ const AudioBox: React.FC = () => {
   } = useSpeechRecognition({commands});
 
   useEffect(() => {
-
-
-
     if(question.length <= 0) return
     resetTranscript()
     console.log("Asking ChatGPT for the answer to: ", question)
@@ -178,7 +300,7 @@ const AudioBox: React.FC = () => {
   }, [isListening])
 
   return (
-    <div className="sm:w-[600px] items-center justify-center border border-white-400 sm:h-[600px]">
+    <div className="sm:w-[600px] items-center justify-center border border-white-400 ">
       <h1 className="text-5xl font-extrabold tracking-tight text-white sm:text-[5rem] text-center">
             Jay <span className="text-[hsl(280,100%,70%)]">Ver</span>N
       </h1>
@@ -192,13 +314,33 @@ const AudioBox: React.FC = () => {
       </button>
 
       <h3 className="text-white text-2xl">{transcript}</h3>
-
       <QueryResult
         question={question}
+        voiceName={voice}
         startListen={() => setIsListening(true)}
         stopListen={() => setIsListening(false)}
 
       />
+
+      <h4 className="text-white mt-16">Prompt A - Hey Jamie *</h4>
+      <textarea
+        className="w-full p-2 bg-emerald-600 text-white h-[200px]"
+        value={promptA}
+        onChange={(ev) => setPropmptA(ev.target.value)}
+      />
+      <h4 className="text-white mt-16">Prompt B - Hey Robot *</h4>
+      <textarea
+        className="w-full p-2 bg-emerald-600 text-white h-[200px]"
+        value={promptB}
+        onChange={(ev) => setPropmptB(ev.target.value)}
+      />
+      <h4 className="text-white mt-16">Prompt C - Hey Betty *</h4>
+      <textarea
+        className="w-full p-2 bg-emerald-600 text-white h-[200px]"
+        value={promptC}
+        onChange={(ev) => setPropmptC(ev.target.value)}
+      />
+
     </div>
   )
 }

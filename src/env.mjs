@@ -25,6 +25,7 @@ export const env = createEnv({
     DISCORD_CLIENT_SECRET: z.string(),
     GOOGLE_CLIENT_ID: z.string(),
     GOOGLE_CLIENT_SECRET: z.string(),
+    GOOGLE_PROJECT_ID: z.string(),
     OPENAI_API_KEY: z.string().min(1),
   },
 
@@ -35,6 +36,8 @@ export const env = createEnv({
    */
   client: {
     // NEXT_PUBLIC_CLIENTVAR: z.string().min(1),
+
+
   },
 
   /**
@@ -51,5 +54,7 @@ export const env = createEnv({
     GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
     GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
     OPENAI_API_KEY: process.env.OPENAI_API_KEY,
+    GOOGLE_PROJECT_ID: process.env.GOOGLE_PROJECT_ID,
+
   },
 });
