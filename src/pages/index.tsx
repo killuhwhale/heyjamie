@@ -61,34 +61,34 @@ const QueryResult: React.FC<QueryResultProps> = (props) => {
     const answer = getAnswer.data?.answer || ""
     if(!answer) return
     getSpeech.mutate({text: answer, voiceName: props.voiceName})
-    const sayMsg = async (msgToSpk: string) => {
-      return new CancelablePromise((res, rej) => {
-        console.log("useEffect QR: ", msgToSpk)
-        const msg = new window.SpeechSynthesisUtterance()
-        const voices = [2,0,3,9]
-        // const voiceNum  = voices[parseInt((Math.random() * (voices.length - 1)).toString())] || 0
-        const voiceNum  = props.voice
-        console.log(`Voice num ${voiceNum}`)
+    // const sayMsg = async (msgToSpk: string) => {
+    //   return new CancelablePromise((res, rej) => {
+    //     console.log("useEffect QR: ", msgToSpk)
+    //     const msg = new window.SpeechSynthesisUtterance()
+    //     const voices = [2,0,3,9]
+    //     // const voiceNum  = voices[parseInt((Math.random() * (voices.length - 1)).toString())] || 0
+    //     const voiceNum  = props.voice
+    //     console.log(`Voice num ${voiceNum}`)
 
-        if(voiceNum == undefined) return
-        msg.voice = window.speechSynthesis.getVoices()[voiceNum] || null
-        // msg.voice = window.speechSynthesis.getVoices()[2] || null // Aussie gal
-        // msg.voice = window.speechSynthesis.getVoices()[3] || null // aussie profession dude
-        // msg.voice = window.speechSynthesis.getVoices()[9] || null // latin accent funny
-        // msg.voice = window.speechSynthesis.getVoices()[10] || null // asian accent funny
-        // msg.voice = window.speechSynthesis.getVoices()[11] || null // asian accent accurate
-
-
+    //     if(voiceNum == undefined) return
+    //     msg.voice = window.speechSynthesis.getVoices()[voiceNum] || null
+    //     // msg.voice = window.speechSynthesis.getVoices()[2] || null // Aussie gal
+    //     // msg.voice = window.speechSynthesis.getVoices()[3] || null // aussie profession dude
+    //     // msg.voice = window.speechSynthesis.getVoices()[9] || null // latin accent funny
+    //     // msg.voice = window.speechSynthesis.getVoices()[10] || null // asian accent funny
+    //     // msg.voice = window.speechSynthesis.getVoices()[11] || null // asian accent accurate
 
 
-        if(!msgToSpk) return console.log("No msg to speak")
-        msg.text = msgToSpk
 
-        window.speechSynthesis.speak(msg)
-        msg.onend = res
-        msg.onerror = rej
-      })
-    }
+
+    //     if(!msgToSpk) return console.log("No msg to speak")
+    //     msg.text = msgToSpk
+
+    //     window.speechSynthesis.speak(msg)
+    //     msg.onend = res
+    //     msg.onerror = rej
+    //   })
+    // }
     // sayMsg("Ohhh, what cha yall gone do now this is a long message to test the stop button it may or may not work? I need a lot of words so lets see if it breaks early or not!").then(() => {""?'':''}).catch(() => {""?'':''})  // test voice, constant speak on render.
 
     // // SpeechRecognition.stopListening().then(() => {true?"":""}).catch(err => {true?"":""})  // @typescript-eslint/no-empty-function
