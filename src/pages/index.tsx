@@ -175,6 +175,12 @@ const QueryResult: React.FC<QueryResultProps> = (props) => {
     console.log("Playing!!!")
     audio.play().then(() => console.log("Done playing")).catch(err => console.log("onPlayerr", err))
 
+    audio.onerror = (err) => {
+      console.log("OnAudio Error: ",  err)
+      alert(err)
+    }
+
+
     audio.onended = () => {
       setPlaying(false)
       props.startListen()
