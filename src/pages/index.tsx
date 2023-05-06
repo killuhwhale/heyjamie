@@ -5,6 +5,7 @@ import { api } from "../utils/api";
 import { useEffect, useRef, useState } from "react";
 import SpeechRecognition, { useSpeechRecognition, } from 'react-speech-recognition';
 import { env } from "../env.mjs";
+import ActionCancelModal from "src/components/ActionCancelModal";
 
 
 
@@ -173,7 +174,11 @@ const QueryResult: React.FC<QueryResultProps> = (props) => {
     setPlaying(true)
     props.stopListen()
     console.log("Playing!!!")
-    audio.play().then(() => console.log("Done playing")).catch(err => console.log("onPlayerr", err))
+    audio.play().then(() => console.log("Done playing")).catch(err => {
+      // alert user that they need to interact
+
+      console.log("onPlayerr", err)
+    })
 
     audio.onerror = (err) => {
       console.log("OnAudio Error: ",  err)
@@ -372,6 +377,8 @@ const AudioBox: React.FC = () => {
 }
 
 const Home: NextPage = () => {
+  const [isOpen, setIsOpen] = useState(true)
+
 
   return (
     <>
@@ -414,6 +421,13 @@ const Home: NextPage = () => {
 
           </div>
         </div>
+        <ActionCancelModal
+          isOpen={isOpen}
+          message="Welcome, click OK to continue"
+          onAction={() => setIsOpen(false)}
+          onClose={() => setIsOpen(false)}
+          note="We need your interaction before autoplaying, thanks!"
+        />
       </main>
     </>
   );
@@ -441,6 +455,7 @@ const AuthShowcase: React.FC = () => {
       >
         {sessionData ? "Sign out" : "Sign in"}
       </button>
+
     </div>
   );
 };
