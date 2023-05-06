@@ -150,7 +150,7 @@ const QueryResult: React.FC<QueryResultProps> = (props) => {
 
 
   useEffect(() => {
-    console.log("GCP Res ", getSpeech.data?.gcpRes)
+    // console.log("GCP Res ", getSpeech.data?.gcpRes)
     if(!getSpeech.data?.gcpRes) return
     const rawData = getSpeech.data?.gcpRes
     if(!rawData) return
@@ -246,6 +246,13 @@ const AudioBox: React.FC = () => {
       }
     },
     {
+      command: 'Hey Jay Vern *',
+      callback: (msg: string) => {
+        setQuestion(msg)
+        setVoice("en-US-Neural2-F")
+      }
+    },
+    {
       command: 'Hey JayBird *',
       callback: (msg: string) => {
         setQuestion(msg)
@@ -263,14 +270,14 @@ const AudioBox: React.FC = () => {
       command: 'Hey Robot *',
       callback: (msg: string) => {
         setQuestion(`${promptB}  ${msg}`)
-        setVoice("en-US-Studio-O")
+        setVoice("en-US-News-N")
       }
     },
     {
       command: 'A Robot *',
       callback: (msg: string) => {
         setQuestion(`${promptB}  ${msg}`)
-        setVoice("en-US-Studio-O")
+        setVoice("en-US-News-N")
       }
     },
     {
@@ -334,19 +341,20 @@ const AudioBox: React.FC = () => {
 
       />
 
-      <h4 className="text-white mt-16">Prompt A - Hey Jamie *</h4>
+      <h5 className="text-white mt-16">Promptless commands: Hey JayVern * | Hey JayBird * | Hey Jay Bird * (all Neural)</h5>
+      <h4 className="text-white mt-16">Prompt A (Studio) - Hey Jamie *</h4>
       <textarea
         className="w-full p-2 bg-emerald-600 text-white h-[200px]"
         value={promptA}
         onChange={(ev) => setPropmptA(ev.target.value)}
       />
-      <h4 className="text-white mt-16">Prompt B - Hey Robot *</h4>
+      <h4 className="text-white mt-16">Prompt B (Wavenet) - Hey Robot * | A Robot *</h4>
       <textarea
         className="w-full p-2 bg-emerald-600 text-white h-[200px]"
         value={promptB}
         onChange={(ev) => setPropmptB(ev.target.value)}
       />
-      <h4 className="text-white mt-16">Prompt C - Hey Betty *</h4>
+      <h4 className="text-white mt-16">Prompt C (Neural) - Hey Betty *</h4>
       <textarea
         className="w-full p-2 bg-emerald-600 text-white h-[200px]"
         value={promptC}
@@ -372,6 +380,33 @@ const Home: NextPage = () => {
             <AuthShowcase />
           </div>
           <AudioBox />
+
+          <div className="hover:text-white hover:bg-emerald-700">
+            <p className="text-white">
+            Pricing table - (hover below)
+            </p>
+
+            <h2 className="mt-6">{`Expected costs: <$10 per month`} $5 DO + $1.50 ChatGPT + $1.50 GCPTTS</h2>
+
+            <h2 className="mt-6">Digital Ocean hosting</h2>
+            <h3>$5/ month flat</h3>
+
+            <h2 className="mt-6">GCP Pricing</h2>
+            <h3>Feature	Free per month	Price after free usage limit is reached</h3>
+            <h3>Neural2 voices	0 to 1 million bytes	    $0.000016 USD per byte      ($16.00 USD per 1 million bytes)</h3>
+            <h3>Studio (Preview) voices	0 to 100K bytes	    $0.00016 USD per byte       ($160.00 USD per 1 million bytes)</h3>
+            <h3>Standard voices	0 to 4 million characters	$0.000004 USD per character ($4.00 USD per 1 million characters)</h3>
+            <h3>WaveNet voices	0 to 1 million characters	$0.000016 USD per character ($16.00 USD per 1 million characters)</h3>
+
+            <h2 className="mt-6">ChatGPT Pricing</h2>
+            <h3>gpt-3.5-turbo(Using)	$0.002 / 1K tokens</h3>
+            <h3>{`gpt-4 8K context =>	$0.03 / 1K tokens |	$0.06 / 1K tokens`}</h3>
+            <h3>{`gpt-4 32K context =>	$0.06 / 1K tokens |	$0.12 / 1K tokens`}</h3>
+            <h3></h3>
+            <h3></h3>
+
+
+          </div>
         </div>
       </main>
     </>
