@@ -9,6 +9,15 @@ const config = {
   reactStrictMode: true,
   // output: "standalone",
   basePath: "/heyjamie",
+  rewrites: async function rewrites(){
+    return [
+      {
+        source: '/api/:path*',
+        destination: '/hjapi/:path*' // Proxy to Backend
+      },
+    ]
+
+  },
 
   /**
    * If you have `experimental: { appDir: true }` set, then you must comment the below `i18n` config
@@ -20,5 +29,6 @@ const config = {
     locales: ["en"],
     defaultLocale: "en",
   },
+
 };
 export default config;
