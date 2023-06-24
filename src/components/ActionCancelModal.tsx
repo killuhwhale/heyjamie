@@ -21,7 +21,7 @@ const ActionCancelModal: React.FC<ActionCancelProps> = ({ isOpen, onAction, onCl
             onClick={onClose}
           ></div>
           <div className="bg-white p-4 rounded-md z-50 w-[600px] h-[350px] flex flex-col justify-between">
-            <h2 className="text-lg text-center justify-center  font-bold mb-2">FitForm</h2>
+            <h2 className="text-lg text-center justify-center  font-bold mb-2">Hey Jamie</h2>
             <p className="p-4 text-lg text-center">{message}</p>
             <p className="p-4 text-base text-center">{note}</p>
             <div className="w-full flex justify-around">
