@@ -4,20 +4,20 @@
  */
 await import("./src/env.mjs");
 
+async function rewrites() {
+  return [
+    {
+      source: '/about',
+      destination: '/',
+    },
+  ]
+}
 /** @type {import("next").NextConfig} */
 const config = {
   reactStrictMode: true,
   // output: "standalone",
-  // basePath: "/heyjamie",
-  rewrites: async function rewrites(){
-    return [
-      {
-        source: '/api/:path*',
-        destination: '/hjapi/:path*' // Proxy to Backend
-      },
-    ]
-
-  },
+  basePath: "/heyjamie",
+  // rewrites: rewrites,
 
   /**
    * If you have `experimental: { appDir: true }` set, then you must comment the below `i18n` config
@@ -31,4 +31,7 @@ const config = {
   },
 
 };
+
+
+
 export default config;
