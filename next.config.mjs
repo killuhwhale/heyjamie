@@ -8,7 +8,7 @@ await import("./src/env.mjs");
 const config = {
   reactStrictMode: true,
   // output: "standalone",
-  basePath: "/heyjamie",
+  // basePath: "/heyjamie",
   rewrites: async function rewrites(){
     return [
       {
