@@ -5,13 +5,14 @@ import { SessionProvider } from "next-auth/react";
 import { api } from "../utils/api";
 
 import "../styles/globals.css";
+import { env } from "src/env.mjs";
 
 const MyApp: AppType<{ session: Session | null }> = ({
   Component,
   pageProps: { session, ...pageProps },
 }) => {
   return (
-    <SessionProvider session={session} basePath="/heyjamie/api/auth">
+    <SessionProvider session={session} basePath={env.AUTHBASEPATH}>
       <Component {...pageProps} />
     </SessionProvider>
   );

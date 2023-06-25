@@ -47,20 +47,34 @@ export const authOptions: NextAuthOptions = {
       },
     }),
     signIn: ({ account, profile, user }) => {
-      console.log("Sign in called with ", account, profile)
-      if (account && profile && profile.email && account.provider === "google") {
-        if(['andayac@gmail.com', 'jason.andaya.72@gmail.com', 'Greg.Gallup@gmail.com', 'chandra.kishore180994@gmail.com', 'archana12n@gmail.com'].indexOf(profile.email) >= 0){
-          user.name  = profile.email.slice(0, profile.email.indexOf('@')).toLowerCase()
-          .trim()
-          .replace(/[^\w\s-]/g, '')
-          .replace(/[\s_-]+/g, '-')
-          .replace(/^-+|-+$/g, ''); // Slugify slug
-          return true
+      console.log("Sign in called with ", account, profile);
+      if (
+        account &&
+        profile &&
+        profile.email &&
+        account.provider === "google"
+      ) {
+        if (
+          [
+            "andayac@gmail.com",
+            "jason.andaya.72@gmail.com",
+            "Greg.Gallup@gmail.com",
+            "chandra.kishore180994@gmail.com",
+            "archana12n@gmail.com",
+          ].indexOf(profile.email) >= 0
+        ) {
+          user.name = profile.email
+            .slice(0, profile.email.indexOf("@"))
+            .toLowerCase()
+            .trim()
+            .replace(/[^\w\s-]/g, "")
+            .replace(/[\s_-]+/g, "-")
+            .replace(/^-+|-+$/g, ""); // Slugify slug
+          return true;
         }
       }
-      return false
+      return false;
     },
-
   },
   adapter: PrismaAdapter(prisma),
   providers: [
@@ -70,8 +84,8 @@ export const authOptions: NextAuthOptions = {
     // }),
     GoogleProvider({
       clientId: env.GOOGLE_CLIENT_ID,
-      clientSecret: env.GOOGLE_CLIENT_SECRET
-    })
+      clientSecret: env.GOOGLE_CLIENT_SECRET,
+    }),
     /**
      * ...add more providers here.
      *

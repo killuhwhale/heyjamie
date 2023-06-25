@@ -1,3 +1,5 @@
+import { env } from "./src/env.mjs";
+
 /**
  * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially useful
  * for Docker builds.
@@ -15,8 +17,8 @@ async function rewrites() {
 /** @type {import("next").NextConfig} */
 const config = {
   reactStrictMode: true,
-  // output: "standalone",
-  basePath: "/heyjamie",
+  output: "standalone",
+  basePath: env.BASEPATH,
   // rewrites: rewrites,
 
   /**
