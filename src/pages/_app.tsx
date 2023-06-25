@@ -12,7 +12,7 @@ const MyApp: AppType<{ session: Session | null }> = ({
   pageProps: { session, ...pageProps },
 }) => {
   return (
-    <SessionProvider session={session} basePath={env.AUTHBASEPATH}>
+    <SessionProvider session={session} basePath={env.NEXT_PUBLIC_AUTHBASEPATH}>
       <Component {...pageProps} />
     </SessionProvider>
   );

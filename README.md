@@ -1,3 +1,8 @@
+ssh killuh@164.92.104.164
+
+
+# Lets encrupt
+https://www.digitalocean.com/community/tutorials/how-to-secure-nginx-with-let-s-encrypt-on-ubuntu-20-04
 
 # Prisma - Adding GAuth
 Needed to add in prisma.schema and then run: npx prisma generate (for cahnges to take effect.)
