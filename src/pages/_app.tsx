@@ -11,7 +11,7 @@ const MyApp: AppType<{ session: Session | null }> = ({
   pageProps: { session, ...pageProps },
 }) => {
   return (
-    <SessionProvider session={session} basePath="heyjamie">
+    <SessionProvider session={session} basePath="/heyjamie/api/auth">
       <Component {...pageProps} />
     </SessionProvider>
   );
