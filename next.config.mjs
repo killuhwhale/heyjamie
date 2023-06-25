@@ -17,7 +17,7 @@ async function rewrites() {
 /** @type {import("next").NextConfig} */
 const config = {
   reactStrictMode: true,
-  output: "standalone",
+  output: env.NEXTOUTPUT == "standalone" ? "standalone": env.NEXTOUTPUT == "export"? "export" : undefined,
   basePath: env.BASEPATH,
   // rewrites: rewrites,
 
