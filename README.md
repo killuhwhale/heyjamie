@@ -1,5 +1,7 @@
 ssh killuh@164.92.104.164
 
+GOOGLE_APPLICATION_CREDENTIALS="/home/killuh/ws_node/jayvern/osrs-service-key.json" npm run dev
+
 
 # Lets encrupt
 https://www.digitalocean.com/community/tutorials/how-to-secure-nginx-with-let-s-encrypt-on-ubuntu-20-04

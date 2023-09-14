@@ -58,6 +58,7 @@ const QueryResult: React.FC<QueryResultProps> = (props) => {
   useEffect(() => {
     const answer = getAnswer.data?.answer || "";
     if (!answer) return;
+    // TODO() set loading spinner here and dismiss when audio returns
     getSpeech.mutate({ text: answer, voiceName: props.voiceName });
     // const sayMsg = async (msgToSpk: string) => {
     //   return new CancelablePromise((res, rej) => {
@@ -139,12 +140,13 @@ const QueryResult: React.FC<QueryResultProps> = (props) => {
   }, [getAnswer.data?.answer]);
 
   useEffect(() => {
-    // console.log("GCP Res ", getSpeech.data?.gcpRes)
+    console.log("GCP Res ", getSpeech.data);
     if (!getSpeech.data?.gcpRes) return;
     const rawData = getSpeech.data?.gcpRes;
     if (!rawData) return;
 
-    const raw = window.atob(rawData);
+    const raw = window.atob(rawData ?? "");
+
     const rawLength = raw.length;
     const arr = new Uint8Array(new ArrayBuffer(rawLength));
 
@@ -155,6 +157,7 @@ const QueryResult: React.FC<QueryResultProps> = (props) => {
     const blob = new Blob([arr], {
       type: "audio/mp3",
     });
+
     const blobUrl = URL.createObjectURL(blob);
     const audio = new Audio();
     audioRef.current = audio;
