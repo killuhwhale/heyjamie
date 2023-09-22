@@ -1,4 +1,3 @@
-ssh killuh@164.92.104.164
 
 GOOGLE_APPLICATION_CREDENTIALS="/home/killuh/ws_node/jayvern/osrs-service-key.json" npm run dev
 

@@ -128,7 +128,7 @@ const getMultiAudio = (
       audioConfig.speakingRate = 1;
       request.audioConfig = audioConfig;
 
-      const CHLEN = 1000; // char length
+      const CHLEN = 600; // char length
       console.log("Requesting multiple... ");
       const filenames = [] as string[];
 
