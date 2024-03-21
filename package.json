@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "build": "npx prisma generate &&  prisma db push && next build",
-    "dev": "next dev",
+    "dev": "GOOGLE_APPLICATION_CREDENTIALS=\"/home/killuh/ws_node/jayvern/osrs-service-key.json\" next dev",
     "postinstall": "prisma generate",
     "lint": "next lint",
     "start": "next start -p 3001"

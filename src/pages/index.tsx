@@ -39,6 +39,7 @@ class CancelablePromise<T> extends Promise<T> {
 interface QueryResultProps {
   question: string;
   voiceName: string;
+  textInput?: string;
   playing: boolean;
   setPlaying: Dispatch<SetStateAction<boolean>>;
   startListen(): void;
@@ -65,7 +66,7 @@ const QueryResult: React.FC<QueryResultProps> = (props) => {
   }, [getAnswer.data?.error]);
 
   useEffect(() => {
-    const answer = getAnswer.data?.answer || "";
+    const answer = getAnswer.data?.answer || props.textInput || "";
 
     if (!answer) return;
     // TODO() set loading spinner here and dismiss when audio returns
@@ -147,11 +148,16 @@ const QueryResult: React.FC<QueryResultProps> = (props) => {
     // .catch(err => {
     //   console.log("Overall saymessages error: ", err)
     // })
-  }, [getAnswer.data?.answer]);
+  }, [getAnswer.data?.answer, props.textInput]);
 
   useEffect(() => {
     console.log("GCP Res ", getSpeech.data);
-    if (!getSpeech.data?.gcpRes) return;
+
+    // if no gpt API results, check for manual text input
+    if (!getSpeech.data?.gcpRes) {
+      return;
+    }
+
     const rawData = getSpeech.data?.gcpRes;
     if (!rawData) return;
 
@@ -338,14 +344,40 @@ const AudioBox: React.FC = () => {
     }
   }, [isListening]);
   const [playing, setPlaying] = useState(false);
+  const [textGptPrompt, setTextGptPrompt] = useState("");
+  const textInputRef = useRef<HTMLTextAreaElement>(null);
   return (
-    <div className=" items-center justify-center  sm:w-[800px] ">
+    <div className=" w-full items-center  justify-center">
       <h1 className="text-center text-5xl font-extrabold tracking-tight text-white sm:text-[5rem]">
         Jay <span className="text-[hsl(120,72%,61%)]">Ver</span>N
       </h1>
       <div className="h-[300px] overflow-y-auto bg-neutral-950 p-4">
         <span className="text-2xl text-emerald-600">Speech Detected</span>
         <p className="text-lg font-bold text-white">{transcript}</p>
+      </div>
+      <div className="h-[350px] overflow-y-auto bg-neutral-900 p-4 text-slate-100">
+        <div className="flex justify-between">
+          <p className="text-2xl text-emerald-600">
+            Text input (paste ChatGPT output here for audio)
+          </p>
+        </div>
+        <textarea
+          className="h-[200px] w-full rounded-md bg-neutral-800 p-2 text-white"
+          ref={textInputRef}
+        ></textarea>
+        <div className="flex w-full justify-end ">
+          <button
+            className="rounded-md bg-neutral-700 p-2 hover:bg-neutral-800"
+            onClick={() => {
+              console.log(textInputRef.current, textInputRef.current?.value);
+              if (textInputRef.current?.value) {
+                setTextGptPrompt(textInputRef.current?.value);
+              }
+            }}
+          >
+            Send Input
+          </button>
+        </div>
       </div>
 
       <div className="flex w-full justify-center">
@@ -380,6 +412,7 @@ const AudioBox: React.FC = () => {
           question={question}
           voiceName={voice}
           playing={playing}
+          textInput={textGptPrompt}
           setPlaying={setPlaying}
           startListen={() => setIsListening(true)}
           stopListen={() => setIsListening(false)}
@@ -434,50 +467,54 @@ const Home: NextPage = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-neutral-900 to-neutral-600">
-        <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16 ">
-          <div className="flex flex-col items-center gap-2">
-            <AuthShowcase />
-          </div>
-          <AudioBox />
+        <div className=" flex w-full flex-col items-center  justify-center py-16 ">
+          <div className="flex w-full ">
+            <div className="flex w-1/6 flex-col justify-center"></div>
+            <div className="flex w-4/6 flex-col justify-center">
+              <AudioBox />
+              <div className="hover:bg-emerald-700 hover:text-white">
+                <p className="text-white">Pricing table - (hover below)</p>
 
-          <div className="hover:bg-emerald-700 hover:text-white">
-            <p className="text-white">Pricing table - (hover below)</p>
+                <h2 className="mt-6">
+                  {`Expected costs: <$10 per month`} $5 DO + $1.50 ChatGPT +
+                  $1.50 GCPTTS
+                </h2>
 
-            <h2 className="mt-6">
-              {`Expected costs: <$10 per month`} $5 DO + $1.50 ChatGPT + $1.50
-              GCPTTS
-            </h2>
+                <h2 className="mt-6">Digital Ocean hosting</h2>
+                <h3>$5/ month flat</h3>
 
-            <h2 className="mt-6">Digital Ocean hosting</h2>
-            <h3>$5/ month flat</h3>
+                <h2 className="mt-6">GCP Pricing</h2>
+                <h3>
+                  Feature Free per month Price after free usage limit is reached
+                </h3>
+                <h3>
+                  Neural2 voices 0 to 1 million bytes $0.000016 USD per byte
+                  ($16.00 USD per 1 million bytes)
+                </h3>
+                <h3>
+                  Studio (Preview) voices 0 to 100K bytes $0.00016 USD per byte
+                  ($160.00 USD per 1 million bytes)
+                </h3>
+                <h3>
+                  Standard voices 0 to 4 million characters $0.000004 USD per
+                  character ($4.00 USD per 1 million characters)
+                </h3>
+                <h3>
+                  WaveNet voices 0 to 1 million characters $0.000016 USD per
+                  character ($16.00 USD per 1 million characters)
+                </h3>
 
-            <h2 className="mt-6">GCP Pricing</h2>
-            <h3>
-              Feature Free per month Price after free usage limit is reached
-            </h3>
-            <h3>
-              Neural2 voices 0 to 1 million bytes $0.000016 USD per byte ($16.00
-              USD per 1 million bytes)
-            </h3>
-            <h3>
-              Studio (Preview) voices 0 to 100K bytes $0.00016 USD per byte
-              ($160.00 USD per 1 million bytes)
-            </h3>
-            <h3>
-              Standard voices 0 to 4 million characters $0.000004 USD per
-              character ($4.00 USD per 1 million characters)
-            </h3>
-            <h3>
-              WaveNet voices 0 to 1 million characters $0.000016 USD per
-              character ($16.00 USD per 1 million characters)
-            </h3>
-
-            <h2 className="mt-6">ChatGPT Pricing</h2>
-            <h3>gpt-3.5-turbo(Using) $0.002 / 1K tokens</h3>
-            <h3>{`gpt-4 8K context =>	$0.03 / 1K tokens |	$0.06 / 1K tokens`}</h3>
-            <h3>{`gpt-4 32K context =>	$0.06 / 1K tokens |	$0.12 / 1K tokens`}</h3>
-            <h3></h3>
-            <h3></h3>
+                <h2 className="mt-6">ChatGPT Pricing</h2>
+                <h3>gpt-3.5-turbo(Using) $0.002 / 1K tokens</h3>
+                <h3>{`gpt-4 8K context =>	$0.03 / 1K tokens |	$0.06 / 1K tokens`}</h3>
+                <h3>{`gpt-4 32K context =>	$0.06 / 1K tokens |	$0.12 / 1K tokens`}</h3>
+                <h3></h3>
+                <h3></h3>
+              </div>
+            </div>
+            <div className="flex h-full w-1/6 justify-center">
+              <AuthShowcase />
+            </div>
           </div>
         </div>
         <ActionCancelModal
@@ -503,13 +540,13 @@ const AuthShowcase: React.FC = () => {
   );
 
   return (
-    <div className="flex flex-col items-center justify-center gap-4">
-      <p className="text-center text-2xl text-white">
+    <div className="flex w-1/2 flex-col items-center justify-center gap-4">
+      <p className="text-center text-sm text-white">
         {sessionData && <span>Logged in as {sessionData.user?.name}</span>}
         {secretMessage && <span> - {secretMessage}</span>}
       </p>
       <button
-        className="rounded-full bg-white/10 px-10 py-3 font-semibold text-white no-underline transition hover:bg-white/20"
+        className="rounded-full bg-white/10 px-10 py-3 text-sm font-semibold text-white no-underline transition hover:bg-white/20"
         onClick={sessionData ? () => void signOut() : () => void signIn()}
       >
         {sessionData ? "Sign out" : "Sign in"}
