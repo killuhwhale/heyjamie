@@ -255,7 +255,7 @@ export const exampleRouter = createTRPCRouter({
       let errMsg = "";
       if (input.text.length <= 5) return { answer: "" };
       const start = performance.now();
-      await sleep(5000);
+
       try {
         // const response = await openai.listEngines();
         console.log("ASKING: ", input.text);
