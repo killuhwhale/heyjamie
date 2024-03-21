@@ -235,6 +235,9 @@ const getMultiAudio = (
     })().catch(rej); // immediately invoked function expression (IIFE) for async operations
   });
 };
+function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
 
 export const exampleRouter = createTRPCRouter({
   hello: publicProcedure
@@ -252,7 +255,7 @@ export const exampleRouter = createTRPCRouter({
       let errMsg = "";
       if (input.text.length <= 5) return { answer: "" };
       const start = performance.now();
-
+      await sleep(5000);
       try {
         // const response = await openai.listEngines();
         console.log("ASKING: ", input.text);

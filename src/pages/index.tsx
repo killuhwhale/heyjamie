@@ -1,13 +1,12 @@
 import { type NextPage } from "next";
-import Head from "next/head";
 import { signIn, signOut, useSession } from "next-auth/react";
-import { api } from "../utils/api";
+import Head from "next/head";
 import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
 import SpeechRecognition, {
   useSpeechRecognition,
 } from "react-speech-recognition";
-import { env } from "../env.mjs";
 import ActionCancelModal from "src/components/ActionCancelModal";
+import { api } from "../utils/api";
 
 class CancelablePromise<T> extends Promise<T> {
   private cancelFn?: () => void;
@@ -41,6 +40,8 @@ interface QueryResultProps {
   voiceName: string;
   textInput?: string;
   playing: boolean;
+  setIsGCPAPIActive: Dispatch<SetStateAction<boolean>>;
+  setIsGPTAPIActive: Dispatch<SetStateAction<boolean>>;
   setPlaying: Dispatch<SetStateAction<boolean>>;
   startListen(): void;
   stopListen(): void;
@@ -54,13 +55,18 @@ const QueryResult: React.FC<QueryResultProps> = (props) => {
   const audioRef = useRef<HTMLAudioElement>();
 
   useEffect(() => {
-    getAnswer.mutate({ text: props.question });
+    if (props.question) {
+      props.setIsGPTAPIActive(true);
+      console.log("props.setIsGPTAPIActive(true);");
+      getAnswer.mutate({ text: props.question });
+    }
   }, [props.question]);
 
   useEffect(() => {
     const error = getAnswer.data?.error || "";
-
     if (!error) return;
+    console.log("props.setIsGPTAPIActive(false);");
+    props.setIsGPTAPIActive(false);
 
     alert(error);
   }, [getAnswer.data?.error]);
@@ -69,7 +75,10 @@ const QueryResult: React.FC<QueryResultProps> = (props) => {
     const answer = getAnswer.data?.answer || props.textInput || "";
 
     if (!answer) return;
+    console.log("props.setIsGPTAPIActive(false);");
+    props.setIsGPTAPIActive(false);
     // TODO() set loading spinner here and dismiss when audio returns
+    props.setIsGCPAPIActive(true);
     getSpeech.mutate({ text: answer, voiceName: props.voiceName });
     // const sayMsg = async (msgToSpk: string) => {
     //   return new CancelablePromise((res, rej) => {
@@ -152,7 +161,7 @@ const QueryResult: React.FC<QueryResultProps> = (props) => {
 
   useEffect(() => {
     console.log("GCP Res ", getSpeech.data);
-
+    props.setIsGCPAPIActive(false);
     // if no gpt API results, check for manual text input
     if (!getSpeech.data?.gcpRes) {
       return;
@@ -343,14 +352,40 @@ const AudioBox: React.FC = () => {
       console.log("UseEffect error: ", error);
     }
   }, [isListening]);
+
   const [playing, setPlaying] = useState(false);
   const [textGptPrompt, setTextGptPrompt] = useState("");
   const textInputRef = useRef<HTMLTextAreaElement>(null);
+
+  const [isGPTAPIActive, setIsGPTAPIActive] = useState(false);
+  const [isGCPAPIActive, setIsGCPAPIActive] = useState(false);
+
   return (
     <div className=" w-full items-center  justify-center">
       <h1 className="text-center text-5xl font-extrabold tracking-tight text-white sm:text-[5rem]">
         Jay <span className="text-[hsl(120,72%,61%)]">Ver</span>N
       </h1>
+
+      <div className="flex h-[100px] w-full justify-end space-x-6 overflow-y-auto bg-neutral-800 p-4">
+        <div
+          className={`h-[30px] bg-green-900 ${
+            isGPTAPIActive ? "font-bold text-green-100" : " text-green-600"
+          }`}
+        >
+          <span className="p-4">
+            GPT {isGPTAPIActive ? "working..." : "waiting..."}
+          </span>
+        </div>
+
+        <div
+          className={`h-[30px] bg-blue-900 ${
+            isGCPAPIActive ? " font-bold text-blue-100" : " text-blue-600"
+          }`}
+        >
+          <span className="p-4">GCP Status {isGCPAPIActive.toString()}</span>
+        </div>
+      </div>
+
       <div className="h-[300px] overflow-y-auto bg-neutral-950 p-4">
         <span className="text-2xl text-emerald-600">Speech Detected</span>
         <p className="text-lg font-bold text-white">{transcript}</p>
@@ -414,6 +449,8 @@ const AudioBox: React.FC = () => {
           playing={playing}
           textInput={textGptPrompt}
           setPlaying={setPlaying}
+          setIsGCPAPIActive={setIsGCPAPIActive}
+          setIsGPTAPIActive={setIsGPTAPIActive}
           startListen={() => setIsListening(true)}
           stopListen={() => setIsListening(false)}
         />
