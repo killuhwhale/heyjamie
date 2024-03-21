@@ -249,6 +249,7 @@ export const exampleRouter = createTRPCRouter({
     .input(z.object({ text: z.string() }))
     .mutation(async ({ input }) => {
       let answer = "";
+      let errMsg = "";
       if (input.text.length <= 5) return { answer: "" };
       const start = performance.now();
 
@@ -268,14 +269,17 @@ export const exampleRouter = createTRPCRouter({
         ) {
           answer = completion.data.choices[0]?.message?.content ?? "";
         }
-      } catch (error) {
-        console.log("OpenAI error: ", error);
+      } catch (error: any) {
+        const errObj = error.toJSON();
+        errMsg = `${errObj["status"]} - ${errObj["message"]}`;
+        console.log("OpenAI error: ", errMsg);
       }
 
       const end = performance.now();
       console.log(`ChatGPT took: ${end - start} ms`);
       return {
         answer,
+        error: errMsg,
       };
     }),
 

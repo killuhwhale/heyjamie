@@ -22,7 +22,7 @@ const ActionCancelModal: React.FC<ActionCancelProps> = ({
             className="fixed inset-0 bg-gray-900 opacity-70"
             onClick={onClose}
           ></div>
-          <div className="z-50 flex h-[350px] w-[600px] flex-col justify-between rounded-md bg-white p-4">
+          <div className="z-50 flex h-[350px] w-[600px] flex-col justify-between rounded-md bg-neutral-900 p-4 text-white">
             <h2 className="mb-2 justify-center text-center  text-lg font-bold">
               Hey Jamie
             </h2>
@@ -37,7 +37,7 @@ const ActionCancelModal: React.FC<ActionCancelProps> = ({
               </button>
               <button
                 onClick={onAction}
-                className="w-1/3 rounded  bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700"
+                className="w-1/3 rounded  bg-red-800 px-4 py-2 font-bold text-white hover:bg-red-600"
               >
                 OK
               </button>

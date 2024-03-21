@@ -2,7 +2,7 @@ import { type NextPage } from "next";
 import Head from "next/head";
 import { signIn, signOut, useSession } from "next-auth/react";
 import { api } from "../utils/api";
-import { useEffect, useRef, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
 import SpeechRecognition, {
   useSpeechRecognition,
 } from "react-speech-recognition";
@@ -39,6 +39,8 @@ class CancelablePromise<T> extends Promise<T> {
 interface QueryResultProps {
   question: string;
   voiceName: string;
+  playing: boolean;
+  setPlaying: Dispatch<SetStateAction<boolean>>;
   startListen(): void;
   stopListen(): void;
 }
@@ -49,14 +51,22 @@ const QueryResult: React.FC<QueryResultProps> = (props) => {
   const getAnswer = api.example.openai.useMutation();
   const getSpeech = api.example.ttsGCP.useMutation();
   const audioRef = useRef<HTMLAudioElement>();
-  const [playing, setPlaying] = useState(false);
 
   useEffect(() => {
     getAnswer.mutate({ text: props.question });
   }, [props.question]);
 
   useEffect(() => {
+    const error = getAnswer.data?.error || "";
+
+    if (!error) return;
+
+    alert(error);
+  }, [getAnswer.data?.error]);
+
+  useEffect(() => {
     const answer = getAnswer.data?.answer || "";
+
     if (!answer) return;
     // TODO() set loading spinner here and dismiss when audio returns
     getSpeech.mutate({ text: answer, voiceName: props.voiceName });
@@ -162,7 +172,7 @@ const QueryResult: React.FC<QueryResultProps> = (props) => {
     const audio = new Audio();
     audioRef.current = audio;
     audio.src = blobUrl;
-    setPlaying(true);
+    props.setPlaying(true);
     props.stopListen();
     console.log("Playing!!!");
     audio
@@ -180,13 +190,13 @@ const QueryResult: React.FC<QueryResultProps> = (props) => {
     };
 
     audio.onended = () => {
-      setPlaying(false);
+      props.setPlaying(false);
       props.startListen();
     };
   }, [getSpeech.data?.gcpRes]);
 
   useEffect(() => {
-    if (playing) {
+    if (props.playing) {
       audioRef.current
         ?.play()
         .then(() => console.log("Done playing"))
@@ -196,24 +206,11 @@ const QueryResult: React.FC<QueryResultProps> = (props) => {
       audioRef.current?.pause();
       props.startListen();
     }
-  }, [playing]);
+  }, [props.playing]);
 
   return (
     <div className="flex w-full justify-center ">
-      <h2 className="w-2/3 text-white"> {getAnswer.data?.answer}</h2>
-
-      <button
-        className={`w-1/2 p-1  ${
-          playing
-            ? "bg-rose-600 text-red-100"
-            : "bg-emerald-600 text-emerald-100"
-        }   `}
-        onClick={() => {
-          setPlaying(!playing);
-        }}
-      >
-        {playing ? "Stop speaking" : "Play"}
-      </button>
+      <p> {getAnswer.data?.answer}</p>
     </div>
   );
 };
@@ -340,60 +337,85 @@ const AudioBox: React.FC = () => {
       console.log("UseEffect error: ", error);
     }
   }, [isListening]);
-
+  const [playing, setPlaying] = useState(false);
   return (
-    <div className="border-white-400 items-center justify-center border sm:w-[600px] ">
+    <div className=" items-center justify-center  sm:w-[800px] ">
       <h1 className="text-center text-5xl font-extrabold tracking-tight text-white sm:text-[5rem]">
-        Jay <span className="text-[hsl(280,100%,70%)]">Ver</span>N
+        Jay <span className="text-[hsl(120,72%,61%)]">Ver</span>N
       </h1>
+      <div className="h-[300px] overflow-y-auto bg-neutral-950 p-4">
+        <span className="text-2xl text-emerald-600">Speech Detected</span>
+        <p className="text-lg font-bold text-white">{transcript}</p>
+      </div>
 
-      <div
-        className={`${
-          listening ? "bg-rose-500" : "bg-slate-600"
-        } rounded-full sm:h-[25px] sm:w-[25px]`}
-      />
-      <button
-        id="record-btn"
-        className={`color-white mx-auto sm:w-full ${
-          isListening ? "bg-rose-500" : "bg-lime-500"
-        }`}
-        onClick={() => setIsListening(!isListening)}
-      >
-        {isListening ? "Stop" : "Start"}
-      </button>
+      <div className="flex w-full justify-center">
+        <button
+          id="record-btn"
+          className={`color-white mx-auto w-1/2 ${
+            isListening ? "bg-rose-500" : "bg-lime-500"
+          }`}
+          onClick={() => setIsListening(!isListening)}
+        >
+          {isListening ? "Stop listening " : "Listen"}
+        </button>
+        <button
+          className={` w-1/2 p-1  ${
+            playing
+              ? "bg-rose-600 text-rose-100"
+              : "bg-emerald-600 text-emerald-100"
+          }   `}
+          onClick={() => {
+            setPlaying(!playing);
+          }}
+        >
+          {playing ? "Stop speaking" : "Speak"}
+        </button>
+      </div>
 
-      <h3 className="text-2xl text-white">{transcript}</h3>
-      <QueryResult
-        question={question}
-        voiceName={voice}
-        startListen={() => setIsListening(true)}
-        stopListen={() => setIsListening(false)}
-      />
+      <div className="h-[800px] overflow-y-auto bg-neutral-900 p-4 text-slate-100">
+        <span className="mb-8 text-2xl text-emerald-600">
+          ChatGpt 3.5 Turbo Response
+        </span>
+        <QueryResult
+          question={question}
+          voiceName={voice}
+          playing={playing}
+          setPlaying={setPlaying}
+          startListen={() => setIsListening(true)}
+          stopListen={() => setIsListening(false)}
+        />
+      </div>
 
-      <h5 className="mt-16 text-white">
-        Promptless commands: Hey JayVern * | Hey JayBird * | Hey Jay Bird * (all
-        Neural)
-      </h5>
-      <h4 className="mt-16 text-white">Prompt A (Studio) - Hey Jamie *</h4>
-      <textarea
-        className="h-[200px] w-full bg-emerald-600 p-2 text-white"
-        value={promptA}
-        onChange={(ev) => setPropmptA(ev.target.value)}
-      />
-      <h4 className="mt-16 text-white">
-        Prompt B (Wavenet) - Hey Robot * | A Robot *
-      </h4>
-      <textarea
-        className="h-[200px] w-full bg-emerald-600 p-2 text-white"
-        value={promptB}
-        onChange={(ev) => setPropmptB(ev.target.value)}
-      />
-      <h4 className="mt-16 text-white">Prompt C (Neural) - Hey Betty *</h4>
-      <textarea
-        className="h-[200px] w-full bg-emerald-600 p-2 text-white"
-        value={promptC}
-        onChange={(ev) => setPropmptC(ev.target.value)}
-      />
+      <div className="border-white-400 border p-8">
+        <h5 className="mt-16 text-white">
+          Promptless commands: Hey JayVern * | Hey JayBird * | Hey Jay Bird *
+          (all Neural)
+        </h5>
+        <h4 className="mt-16 font-bold text-white">
+          Prompt A (Studio) - Hey Jamie *
+        </h4>
+        <textarea
+          className="h-[200px] w-full bg-stone-900 p-2 text-white"
+          value={promptA}
+          onChange={(ev) => setPropmptA(ev.target.value)}
+        />
+        <h4 className="mt-16 font-bold text-white">
+          Prompt B (Wavenet) - Hey Robot * | A Robot *
+        </h4>
+        <textarea
+          className="h-[200px] w-full bg-stone-900 p-2 text-white"
+          value={promptB}
+          onChange={(ev) => setPropmptB(ev.target.value)}
+        />
+        <h4 className="mt-16 font-bold text-white">
+          Prompt C (Neural) - Hey Betty *
+        </h4>
+        <textarea
+          className="h-[200px] w-full bg-stone-900 p-2 text-white"
+          value={promptC}
+          onChange={(ev) => setPropmptC(ev.target.value)}
+        />
+      </div>
     </div>
   );
 };
@@ -411,7 +433,7 @@ const Home: NextPage = () => {
         />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-[#2e026d] to-[#15162c]">
+      <main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-neutral-900 to-neutral-600">
         <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16 ">
           <div className="flex flex-col items-center gap-2">
             <AuthShowcase />
