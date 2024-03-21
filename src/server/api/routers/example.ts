@@ -270,7 +270,9 @@ export const exampleRouter = createTRPCRouter({
           answer = completion.data.choices[0]?.message?.content ?? "";
         }
       } catch (error: any) {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
         const errObj = error.toJSON();
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/restrict-template-expressions
         errMsg = `${errObj["status"]} - ${errObj["message"]}`;
         console.log("OpenAI error: ", errMsg);
       }
